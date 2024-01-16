@@ -1,19 +1,40 @@
-import {createContext, useState} from "react";
+import {createContext, useEffect, useState} from "react";
 import Modal from "./components/ui/Modal";
+import {TTask} from "./type";
 
 export const ModalContext = createContext(null)
 
 const App = () => {
   const [modal, setModal] = useState(false);
-  const [taskList, setTaskList] = useState([]);
+  const[tasks, setTasks] = useState([])
+  const [taskList, setTaskList] = useState<TTask[]>(tasks);
 
   const handleModal = () => {
     setModal(prev => !prev)
   }
 
+  const addTask = (data) => {
+    const taskId = "id" + Math.random().toString(16).slice(2)
+    const task = {id: taskId, ...data}
+    setTaskList([...taskList, task])
+   
+    handleModal()
+  }
+
+  useEffect(() => {
+    if(taskList.length > 1){
+      localStorage.setItem('tasks', JSON.stringify(taskList))
+    }
+    const getTasks = localStorage.getItem('tasks')
+    setTasks(JSON.parse(getTasks))
+
+    console.log(JSON.parse(getTasks), 'task')
+  },[taskList])
+
+  console.log(taskList, 'task from app')
 
   return (
-  <ModalContext.Provider value={{taskList, setTaskList}}>
+  <ModalContext.Provider value={{taskList, setTaskList, addTask}}>
     <div className="w-full max-w-[800px] mx-auto pt-10">
       <div className="flex justify-between items-center bg-white rounded-2xl rounded-b-none px-8 py-5">
         <h2 className="text-2xl font-bold text-gray-700">Task List</h2>
